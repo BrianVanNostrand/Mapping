@@ -159,6 +159,10 @@
         const view = new MapView({
             container: "viewDiv",
             map: map,
+            center: [
+                -97.37537005786264,
+                38.507038554557255                
+            ],
             highlightOptions: {
                 fillOpacity: 0,
                 color: [50, 50, 50]
@@ -171,10 +175,13 @@
                 }
             },
             constraints: {
-                maxScale: 35000
+                maxScale: 35000,
+                minScale: 18489297.737236,
             }
         });
-
+        /*view.watch("center",(scale)=>{
+            console.log(scale)
+        })*/
         const layerTitle = layers.map((layer)=>{
             return layer.title
         })
@@ -192,7 +199,7 @@
                     view: view,
                     content: new Legend({ view: view }),
                     group: "top-left",
-                    expanded: true
+                    expanded: window.innerWidth>545?true:false
                 })
             ],
             "top-left",
