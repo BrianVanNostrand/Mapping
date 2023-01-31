@@ -22,134 +22,198 @@
     <script>
       require([
         "esri/WebMap",
+        "esri/Map",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
         "esri/renderers/DotDensityRenderer",
         "esri/widgets/Legend",
         "esri/widgets/Bookmarks",
-        "esri/widgets/Expand"
-      ], (WebMap, MapView, FeatureLayer, DotDensityRenderer, Legend, Bookmarks, Expand) => {
-        const map = new WebMap({
-          portalItem: {
-            id: "56b5bd522c52409c90d902285732e9f1"
-          }
-        });
+        "esri/widgets/Expand",
+        "esri/widgets/BasemapGallery"
+      ], (WebMap, Map, MapView, FeatureLayer, DotDensityRenderer, Legend, Bookmarks, Expand, BasemapGallery) => {
+        const map = new Map({
+            basemap: "streets-vector"
+        });   
+        const layers = [
+            new FeatureLayer({
+                url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Nativity_Citizenship_Boundaries/FeatureServer/2",
+                minScale: 200000000,
+                maxScale: 35000,
+                title: "Nativity of Birth (ACS)",
+                popupTemplate: {
+                title: "{County}, {State}",
+                content: [
+                {
+                    type: "media",
+                    mediaInfos: [
+                        {
+                        title: "Nativity of Birth (ACS)",
+                        type: "bar-chart",
+                        value: {
+                            fields: [
+                            "B05003_020E",
+                            "B05003_021E",
+                            ],
+                            tooltipField: "<field name>"
+                        }
+                        }
+                    ]
+                },
+                {
+                    type: "fields",
+                }
+                ],
+                fieldInfos: [
+                    {
+                    fieldName: "B05003_020E",
+                    label: "Native",
+                    format: {
+                            digitSeparator: true,
+                            places: 0,
+                        },
+                    },
+                    {
+                        fieldName: "B05003_021E",
+                        label: "Foreign",
+                        format: {
+                            digitSeparator: true,
+                            places: 0,
+                        },
+                    }
+                ]
+                }
+            }),
+            new FeatureLayer({
+                url: "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Nativity_Citizenship_Boundaries/FeatureServer/2",
+                minScale: 200000000,
+                maxScale: 35000,
+                title: "test",
+                popupTemplate: {
+                title: "{County}, {State}",
+                content: [
+                {
+                    type: "media",
+                    mediaInfos: [
+                        {
+                        title: "Nativity of Birth (ACS)",
+                        type: "bar-chart",
+                        value: {
+                            fields: [
+                            "B05003_020E",
+                            "B05003_021E",
+                            ],
+                            tooltipField: "<field name>"
+                        }
+                        }
+                    ]
+                },
+                {
+                    type: "fields",
+                }
+                ],
+                fieldInfos: [
+                    {
+                    fieldName: "B05003_020E",
+                    label: "Native",
+                    format: {
+                            digitSeparator: true,
+                            places: 0,
+                        },
+                    },
+                    {
+                        fieldName: "B05003_021E",
+                        label: "Foreign",
+                        format: {
+                            digitSeparator: true,
+                            places: 0,
+                        },
+                    }
+                ]
+                }
+            })
+        ]
+        const renderers = [
+            new DotDensityRenderer({
+                dotValue: 100,
+                outline: null,
+                referenceScale: 1577790,  // 1:577,790 view scale
+                legendOptions: {
+                unit: "people"
+                },
+                attributes: [
+                {
+                    field: "B05003_020E",
+                    color: "#f23c3f",
+                    label: "Native Born"
+                },
+                {
+                    field: "B05003_021E",
+                    color: "#96f7ef",
+                    label: "Foreign-Born"
+                }
+                ]
+            })
+        ]
+        //#region layerDefinitions
 
         const view = new MapView({
-          container: "viewDiv",
-          map: map,
-          highlightOptions: {
-            fillOpacity: 0,
-            color: [50, 50, 50]
-          },
-          popup: {
-            dockEnabled: true,
-            dockOptions: {
-              position: "top-right",
-              breakpoint: false
+            container: "viewDiv",
+            map: map,
+            highlightOptions: {
+                fillOpacity: 0,
+                color: [50, 50, 50]
+            },
+            popup: {
+                dockEnabled: true,
+                dockOptions: {
+                    position: "top-right",
+                    breakpoint: false
+                }
+            },
+            constraints: {
+                maxScale: 35000
             }
-          },
-          constraints: {
-            maxScale: 35000
-          }
         });
 
+        const layerTitle = layers.map((layer)=>{
+            return layer.title
+        })
         view.when().then(() => {
-          const dotDensityRenderer = new DotDensityRenderer({
-            dotValue: 100,
-            outline: null,
-            referenceScale: 1577790,  // 1:577,790 view scale
-            legendOptions: {
-              unit: "people"
-            },
-            attributes: [
-              {
-                field: "B05003_020E",
-                color: "#f23c3f",
-                label: "Native Born"
-              },
-              {
-                field: "B05003_021E",
-                color: "#96f7ef",
-                label: "Foreign-Born"
-              }
-            ]
-          });
 
           // Add renderer to the layer and define a popup template
-          let url = "https://services.arcgis.com/P3ePLMYs2RVChkJx/ArcGIS/rest/services/ACS_Nativity_Citizenship_Boundaries/FeatureServer/2"
-          const oldurl =
-            "https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/ACS_Population_by_Race_and_Hispanic_Origin_Boundaries/FeatureServer/2";
-          const layer = new FeatureLayer({
-            url: url,
-            minScale: 200000000,
-            maxScale: 35000,
-            title: "Current Population Estimates (ACS)",
-            popupTemplate: {
-              title: "{County}, {State}",
-              content: [
-              {
-                  type: "media",
-                  mediaInfos: [
-                    {
-                      title: "Current Population Estimates (ACS)",
-                      type: "bar-chart",
-                      value: {
-                        fields: [
-                          "B05003_020E",
-                          "B05003_021E",
-                        ],
-                        tooltipField: "<field name>"
-                      }
-                    }
-                  ]
-                },
-                {
-                  type: "fields",
-                }
-              ],
-              fieldInfos: [
-                {
-                  fieldName: "B05003_020E",
-                  label: "Native",
-                  format: {
-                    digitSeparator: true,
-                    places: 0,
-                  },
-                },
-                {
-                  fieldName: "B05003_021E",
-                  label: "Foreign",
-                  format: {
-                    digitSeparator: true,
-                    places: 0,
-                  },
-                }
-              ]
-            },
-            renderer: dotDensityRenderer
-          });
+          //#region 
+            const defaultLayer = layers[0]
+            defaultLayer.renderer = renderers[0]
+            map.add(defaultLayer);
 
-          map.add(layer);
-
-          view.ui.add(
-            [
-              new Expand({
-                view: view,
-                content: new Legend({ view: view }),
-                group: "top-left",
-                expanded: true
-              }),
-              new Expand({
-                view: view,
-                content: new Bookmarks({ view: view }),
-                group: "top-left"
-              })
+        view.ui.add(
+            [   
+                new Expand({
+                    view: view,
+                    content: new Legend({ view: view }),
+                    group: "top-left",
+                    expanded: true
+                })
             ],
-            "top-left"
-          );
+            "top-left",
+        );
+        view.ui.add(
+            new Expand({
+                content: new BasemapGallery({
+                    view:view,
+                    group: "bottom-left",
+                }),
+            }),
+            "bottom-left"
+        )
+        /*  [
+                new Basemap({
+                    baseLayers: "topo"
+                })
+            ],
+            "bottom-right"*/
+            });
         });
-      });
     </script>
   </head>
 
